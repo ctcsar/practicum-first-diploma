@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 
-	"database/sql"
-
 	chi "github.com/go-chi/chi/v5"
+	"github.com/pressly/goose"
 	"go.uber.org/zap"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
 
 	f "github.com/ctcsar/practicum-first-diploma/internal/flags"
 	"github.com/ctcsar/practicum-first-diploma/internal/handlers"
@@ -23,7 +22,6 @@ func main() {
 	flags.SetServerFlags()
 	flag.Parse()
 	handler := chi.NewRouter()
-
 	db, err := sql.Open("pgx", flags.GetDatabasePath())
 	if err != nil {
 		logger.Log.Fatal("cannot connect to database", zap.Error(err))
