@@ -6,7 +6,7 @@ import (
 	"flag"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/pressly/goose"
+	"github.com/pressly/goose/v3"
 	"go.uber.org/zap"
 
 	_ "github.com/jackc/pgx/v5/stdlib"

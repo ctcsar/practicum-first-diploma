@@ -3,13 +3,16 @@ package auth
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ctcsar/practicum-first-diploma/internal/database"
+	"github.com/ctcsar/practicum-first-diploma/internal/logger"
 )
 
 type User struct {
@@ -17,6 +20,16 @@ type User struct {
 	Login        string    `json:"login"`
 	Password     string    `json:"password"`
 	RegisterDate string    `json:"registerDate,omitempty"`
+}
+
+var JWT_KEY string
+
+func init() {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		logger.Log.Fatal("Error loading .env file")
+	}
+	JWT_KEY = os.Getenv("JWT_SECRET")
 }
 
 func HashPassword(password string) (string, error) {
@@ -47,6 +60,7 @@ func CreateUser(login string, password string) (*User, error) {
 func AuthUser(login string, password string, db *sql.DB) (string, error) {
 	var uuid uuid.UUID
 	var pass string
+	fmt.Printf("JWT_KEY: %s\n", JWT_KEY)
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		return "", err
@@ -73,7 +87,7 @@ func GenerateToken(id uuid.UUID, login string) (string, error) {
 		"login": login,
 		"exp":   time.Now().Add(time.Hour * 72).Unix(),
 	})
-	return token.SignedString([]byte("secretkey"))
+	return token.SignedString([]byte(JWT_KEY))
 }
 
 func VerifyToken(tokenString string) (jwt.Claims, error) {
@@ -81,7 +95,7 @@ func VerifyToken(tokenString string) (jwt.Claims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte("secretkey"), nil
+		return []byte(JWT_KEY), nil
 	})
 	if err != nil {
 		return nil, err

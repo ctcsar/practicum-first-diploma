@@ -23,3 +23,5 @@ vendor/
 .vscode
 
 .DS_store
+
+.env

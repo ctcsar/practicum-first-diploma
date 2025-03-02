@@ -103,6 +103,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	user, err := auth.AuthUser(buff.Login, buff.Password, db)
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Fprint(w, "User not found")
+			return
+		}
 		w.WriteHeader(http.StatusUnauthorized)
 		logger.Log.Error("cannot auth user", zap.Error(err))
 		return
